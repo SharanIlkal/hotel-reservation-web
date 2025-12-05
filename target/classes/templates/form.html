@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reservation Form</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Roboto font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Aesthetic Black & White centered form ===== */
+    :root{
+      --page-bg: #000000;    /* page background - black */
+      --card-bg: #0b0b0b;    /* card background - near-black */
+      --field-bg: #0b0b0b;   /* input background - same as card */
+      --border: #222222;     /* subtle border */
+      --muted: #bdbdbd;      /* muted text for placeholders */
+      --text: #ffffff;       /* white text */
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; }
+    body{
+      font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--page-bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px;
+    }
+
+    /* page container centers the card and limits width */
+    .page {
+      width:100%;
+      max-width: 760px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      align-items:center;
+    }
+
+    /* header (title + subtitle) */
+    .header {
+      text-align:left;
+      width:100%;
+    }
+    .title {
+      font-size:20px;
+      font-weight:700;
+      color: var(--text);
+      margin: 0 0 6px 0;
+    }
+    .subtitle {
+      margin:0;
+      color: var(--muted);
+      font-size:13px;
+    }
+
+    /* card */
+    .card {
+      width:100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--radius);
+      padding: 22px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      display:block;
+    }
+
+    /* form layout: stacked fields */
+    form { width:100%; }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    label {
+      font-size:13px;
+      color: var(--text);
+      font-weight:600;
+    }
+
+    input[type="text"], input[type="number"] {
+      background: var(--field-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding:12px 14px;
+      border-radius:10px;
+      font-size:15px;
+      outline: none;
+      transition: box-shadow .12s ease, border-color .12s ease, transform .06s ease;
+    }
+
+    input::placeholder {
+      color: var(--muted);
+      opacity: 0.9;
+    }
+
+    input:focus {
+      border-color: #444444;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      transform: translateY(-1px);
+    }
+
+    /* disabled value style */
+    input[disabled] {
+      opacity: 0.85;
+      cursor: not-allowed;
+    }
+
+    /* actions */
+    .form-actions {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:6px;
+      flex-wrap:wrap;
+    }
+    .btn {
+      display:inline-block;
+      padding:12px 16px;
+      border-radius:10px;
+      background: #111111;
+      color: var(--text);
+      font-weight:700;
+      border: 1px solid var(--border);
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight:600;
+    }
+
+    .meta {
+      margin-top:14px;
+      font-size:13px;
+      color: var(--muted);
+    }
+
+    /* small invalid shake */
+    @keyframes shake {
+      0% { transform: translateX(0) }
+      20% { transform: translateX(-6px) }
+      40% { transform: translateX(6px) }
+      60% { transform: translateX(-4px) }
+      80% { transform: translateX(4px) }
+      100% { transform: translateX(0) }
+    }
+
+    /* responsive */
+    @media (max-width: 600px){
+      .page { padding: 0 10px; }
+      .card { padding:18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="title" th:text="${reservation.reservationId} != null ? 'Edit Reservation' : 'New Reservation'">New Reservation</div>
+      <p class="subtitle">Add or update guest booking information</p>
+    </div>
+
+    <div class="card" id="cardRoot">
+      <form th:action="@{/save}" th:object="${reservation}" method="post" id="reservationForm" onsubmit="return handleSubmit(event)">
+        <input type="hidden" th:field="*{reservationId}" />
+
+        <!-- Guest Name -->
+        <div class="field">
+          <label for="guestName">Guest Name</label>
+          <input id="guestName" type="text" th:field="*{guestName}" placeholder="Enter full name" required />
+        </div>
+
+        <!-- Room Number -->
+        <div class="field">
+          <label for="roomNumber">Room Number</label>
+          <input id="roomNumber" type="number" th:field="*{roomNumber}" placeholder="Enter room number" required />
+        </div>
+
+        <!-- Contact Number -->
+        <div class="field">
+          <label for="contactNumber">Contact Number</label>
+          <input id="contactNumber" type="text" th:field="*{contactNumber}" placeholder="Enter mobile number" />
+        </div>
+
+        <!-- Reservation Date (disabled)
+        <div class="field">
+          <label for="reservationDate">Reservation Date</label>
+          <input id="reservationDate" type="text" th:value="${reservation.reservationDate}" disabled />
+        </div> -->
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="saveBtn">Save Reservation</button>
+          <a th:href="@{/}" class="btn ghost">Cancel</a>
+        </div>
+      </form>
+
+      <div class="meta"></div>
+    </div>
+  </div>
+
+  <script>
+    // Centered monochrome form UX: validate and shake if invalid
+    function handleSubmit(e) {
+      var form = document.getElementById('reservationForm');
+      var card = document.getElementById('cardRoot');
+      var guest = document.getElementById('guestName').value.trim();
+      var room = document.getElementById('roomNumber').value.trim();
+
+      if (!guest || !room || isNaN(room)) {
+        e.preventDefault();
+        // invalid -> shake
+        card.style.animation = 'shake .36s';
+        setTimeout(function(){ card.style.animation = ''; }, 380);
+        return false;
+      }
+      // allow submit to proceed
+      return true;
+    }
+  </script>
+</body>
+</html>

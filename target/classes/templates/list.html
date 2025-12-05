@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reservations</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --page-bg: #000000;
+      --card-bg: #0b0b0b;
+      --card-border: #1a1a1a;
+      --muted: #bdbdbd;
+      --text: #ffffff;
+      --btn-bg: #111111;
+      --ghost-border: #222222;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; }
+    body{
+      font-family:"Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--page-bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding: 28px 18px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .page {
+      width:100%;
+      max-width: 1100px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    /* Header (no logo) */
+    .header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      width:100%;
+    }
+    .head-left {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .title {
+      font-size:20px;
+      font-weight:700;
+      color: var(--text);
+    }
+    .subtitle {
+      font-size:13px;
+      color: var(--muted);
+    }
+
+    .actions { display:flex; gap:12px; align-items:center; }
+
+    .btn {
+      padding:10px 14px;
+      border-radius:10px;
+      background: var(--btn-bg);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:700;
+      border: 1px solid var(--card-border);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--text);
+      border:1px solid var(--ghost-border);
+      font-weight:600;
+    }
+    .btn.small { padding:8px 10px; font-size:14px; border-radius:8px; }
+
+    /* Card */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.6);
+    }
+
+    .card-top {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .card-top .heading { font-weight:700; color:var(--text); }
+    .meta { color: var(--muted); font-size:13px; }
+
+    /* Table */
+    .table-wrap {
+      overflow: auto;
+      border-radius:10px;
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      min-width:720px;
+    }
+    thead th {
+      text-align:left;
+      padding:12px 14px;
+      font-size:13px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      background: transparent;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(6px);
+    }
+    tbody td {
+      padding:12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      color: var(--text);
+      font-size:15px;
+      vertical-align: middle;
+    }
+    td.actions a { margin-right:8px; text-decoration:none; }
+
+    /* Empty state */
+    .empty {
+      padding:22px;
+      text-align:center;
+      color: var(--muted);
+    }
+
+    /* Mobile card list */
+    .card-list { display:none; gap:12px; margin-top:12px; }
+    .card-item {
+      background: rgba(255,255,255,0.02);
+      padding:12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .card-item .row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; }
+    .card-item .meta { color:var(--muted); font-size:13px; }
+
+    /* Responsive behavior: show mobile cards and hide table */
+    @media (max-width:900px){
+      table { display:none; }
+      .card-list { display:block; }
+    }
+
+    /* small hover effects */
+    tr:hover td { background: rgba(255,255,255,0.01); }
+    .btn.small:hover { transform: translateY(-3px); transition: transform .12s ease; }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header (no brand/logo) -->
+    <div class="header">
+      <div class="head-left">
+        <div class="title"><h1>Hotel Reservations</h1></div>
+        <div class="subtitle">Manage bookings — quick and simple</div>
+      </div>
+      
+      <div class="actions">
+        <a class="btn" th:href="@{/new}">+ New Reservation</a>
+      </div>
+    </div>
+<br><br>
+    <div class="card">
+      <div class="card-top">
+        <div class="heading">Current Reservations</div>
+        <div class="meta">Total: <span th:text="${#lists.size(reservations)}">0</span></div>
+      </div>
+
+      <div class="table-wrap" th:if="${#lists.size(reservations) > 0}">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Guest</th>
+              <th>Room</th>
+              <th>Contact</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="res : ${reservations}">
+              <td th:text="${res.reservationId}">1</td>
+              <td th:text="${res.guestName}">Guest</td>
+              <td th:text="${res.roomNumber}">101</td>
+              <td th:text="${res.contactNumber}">123</td>
+              <td th:text="${res.reservationDate}">2025-12-01</td>
+              <td class="actions">
+                <a th:href="@{'/edit/' + ${res.reservationId}}" class="btn small">Edit</a>
+                <a th:href="@{'/delete/' + ${res.reservationId}}" onclick="return confirm('Delete?')" class="btn small ghost">Delete</a>
+                <a th:href="@{'/room/' + ${res.reservationId}}" target="_blank" class="btn small ghost">Room #</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div th:if="${#lists.size(reservations) == 0}" class="empty">
+        No reservations yet. Click <a th:href="@{/new}" class="btn small">New Reservation</a> to create one.
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="card-list" th:if="${#lists.size(reservations) > 0}">
+        <div class="card-item" th:each="res : ${reservations}">
+          <div class="row">
+            <div>
+              <div style="font-weight:700;">
+                <span th:text="${res.reservationId}">1</span>
+                &nbsp;—&nbsp;
+                <span th:text="${res.guestName}">Guest</span>
+              </div>
+              <div class="meta">Room: <span th:text="${res.roomNumber}">101</span> • <span th:text="${res.reservationDate}">date</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <a th:href="@{'/edit/' + ${res.reservationId}}" class="btn small">Edit</a>
+              <a th:href="@{'/delete/' + ${res.reservationId}}" onclick="return confirm('Delete?')" class="btn small ghost">Delete</a>
+            </div>
+          </div>
+          <div class="meta">Contact: <span th:text="${res.contactNumber}">123</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
