@@ -1,7 +1,12 @@
 # Hotel Reservation Web (Spring Boot)
 
 ## What
-A simple Spring Boot + Thymeleaf web application for managing hotel reservations (CRUD). The project uses MySQL as the datasource.
+Hotel Reservation Web Application — Project Description
+
+The Hotel Reservation Web Application is a full-stack hotel booking system built using Spring Boot, Thymeleaf, and PostgreSQL, designed to allow users to easily create, view, and manage hotel room reservations through a clean and responsive UI.
+
+This project demonstrates core concepts of web development, backend APIs, database integration, UI/UX design, and cloud deployment.
+It is fully hosted online using Render (backend) and can be extended with any frontend deployment platform.
 
 ## How to run
 1. Ensure Java 17+ and Maven are installed.
